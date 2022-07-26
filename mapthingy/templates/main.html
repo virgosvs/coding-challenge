@@ -34,11 +34,12 @@
             function initMap() {
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 4,
-                    center: { lat: 37.7749, lng: 122.4194 } // San Francisco
+                    center: { lat: 37.7749, lng: -122.4194 } // San Francisco, fix the longitude to point west
                 });
 
                 API.start("localhost:8888/wsapi/", function() {
                     console.log("Ready to map stuff!");
+                    API.sendMessage(JSON.stringify({ latitude: 37.3349, longitude: -122.4194 }))
                 }, function(position) {
                     showMarker(map, posFromApi(position));
                 });

@@ -43,6 +43,13 @@ var API = (function () {
                 msg: 'getPosition',
                 payload: hostname
             }));
+        },
+
+        sendMessage: function(position) {
+            _socket.send(JSON.stringify({
+                msg: 'position',
+                payload: position
+            }))
         }
     };
 }());

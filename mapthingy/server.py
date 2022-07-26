@@ -26,6 +26,8 @@ class APIHandler(tornado.websocket.WebSocketHandler):
         msg = json.loads(message)
         if msg['msg'] == 'getPosition':
             self.get_position(msg['payload'])
+        elif msg['msg'] == 'position':
+            self.send_position(msg['payload'])
 
     def open(self):
         print("Client connected")
@@ -43,6 +45,13 @@ class APIHandler(tornado.websocket.WebSocketHandler):
         self.write_message({
             'msg': 'position',
             'payload': res.body.decode('utf-8')
+        })
+
+    def send_position(self, payload):
+        # write message from python tornado
+        self.write_message({
+            'msg': 'position',
+            'payload': payload
         })
 
 
