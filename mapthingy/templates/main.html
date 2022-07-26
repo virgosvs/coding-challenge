@@ -19,14 +19,18 @@
             function posFromApi(pos) {
                 return {
                     lat: pos.latitude,
-                    lng: pos.longitude
+                    lng: pos.longitude,
+                    ip: pos.ip
                 }
             }
 
             function showMarker(map, pos) {
                 var marker = new google.maps.Marker({
                     position: pos,
-                    map: map
+                    map: map,
+                    label: {
+                        text: pos.ip
+                    }
                 });
                 markers.push(marker);
             }
@@ -39,7 +43,7 @@
 
                 API.start("localhost:8888/wsapi/", function() {
                     console.log("Ready to map stuff!");
-                    API.sendMessage(JSON.stringify({ latitude: 37.3349, longitude: -122.4194 }))
+                    API.sendMessage(JSON.stringify({ latitude: 37.3349, longitude: -122.4194, ip: 'localhost:8888' }))
                 }, function(position) {
                     showMarker(map, posFromApi(position));
                 });
