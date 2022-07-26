@@ -20,7 +20,14 @@ class APIHandler(tornado.websocket.WebSocketHandler):
         Should return True if the value is a string ending
         in a period, followed by a number of letters.
         """
-        return None
+        dotindex = s.rindex('.', 0, len(s))
+        letters = ''
+        if dotindex != -1:
+            letters = s[dotindex + 1: ]
+        for letter in letters:
+            if not letter.isalpha():
+                return False
+        return True
 
     def process_message(self, message):
         msg = json.loads(message)
