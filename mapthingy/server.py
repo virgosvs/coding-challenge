@@ -1,7 +1,7 @@
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from tornado import httpclient
+from tornado import httpclient, gen
 import os
 import json
 
@@ -20,12 +20,25 @@ class APIHandler(tornado.websocket.WebSocketHandler):
         Should return True if the value is a string ending
         in a period, followed by a number of letters.
         """
-        return None
+        dotindex = s.rindex('.', 0, len(s))
+        letters = ''
+        if dotindex != -1:
+            letters = s[dotindex+1:]
+        for i in letters:
+            if not i.isalpha():
+                return False
+        return True
 
     def process_message(self, message):
         msg = json.loads(message)
         if msg['msg'] == 'getPosition':
             self.get_position(msg['payload'])
+        elif msg['msg'] == 'position':
+            self.send_position(msg['payload'])
+        elif msg['msg'] == 'getAllPositions':
+            self.send_all_positions(msg['payload'])
+        elif msg['msg'] == 'getAllHostPositions':
+            self.get_all_host_positions(msg['payload'])
 
     def open(self):
         print("Client connected")
@@ -45,6 +58,44 @@ class APIHandler(tornado.websocket.WebSocketHandler):
             'payload': res.body.decode('utf-8')
         })
 
+    @gen.coroutine
+    def get_all_host_positions(self, hosts):
+        client = httpclient.HTTPClient()
+        for host in hosts:
+            api_request_url = IPSTACK_URL_PATTERN % {'host': host, 'access_key': IPSTACK_KEY}
+            res = client.fetch(api_request_url)
+            self.write_message({
+                'msg': 'position',
+                'payload': res.body.decode('utf-8')
+            })
+        # todo: make asynchronous
+        # client = httpclient.AsyncHTTPClient()
+        # urls = []
+        # responses = []
+        # for host in hosts:
+        #     api_request_url = IPSTACK_URL_PATTERN % {'host': host, 'access_key': IPSTACK_KEY}
+        #     urls.append(api_request_url)
+        # waiter = gen.WaitIterator(*[client.fetch(url) for url in urls])
+        # while not waiter.done():
+        #     try:
+        #         waiternext = yield waiter.next()
+        #         responses.append(waiternext)
+        #     except Exception:
+        #         continue
+        # return responses
+
+    def send_position(self, payload):
+        # write message from python tornado
+        self.write_message({
+            'msg': 'position',
+            'payload': payload
+        })
+
+    def send_all_positions(self, payload):
+        self.write_message({
+            'msg': 'allPositions',
+            'payload': payload
+        })
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
