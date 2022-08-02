@@ -15,9 +15,13 @@ var API = (function () {
                 var data = JSON.parse(event.data);
 
                 if (data.msg === "position") {
-                    console.log("Position received", data);
                     var position = JSON.parse(data.payload);
                     positionCallback(position);
+                } else if (data.msg === 'allPositions') {
+                    var positions = data.payload.split(',')
+                    for(var position of positions) {
+                        positionCallback(position);
+                    }
                 } else {
                     console.log("Unknown message", data);
                 }
@@ -41,11 +45,19 @@ var API = (function () {
         getHostPosition: function (hostname, callback) {
             _socket.send(JSON.stringify({
                 msg: 'getPosition',
-                payload: hostname
+                payload: hostname,
+            }));
+        },
+
+        getAllHostPositions: function(hostnames) {
+            _socket.send(JSON.stringify({
+                msg: 'getAllHostPositions',
+                payload: hostnames,
             }));
         },
 
         sendMessage: function(position) {
+            console.log('sending message with position of ', position)
             _socket.send(JSON.stringify({
                 msg: 'position',
                 payload: position

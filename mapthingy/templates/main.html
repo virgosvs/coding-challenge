@@ -25,10 +25,13 @@
             }
 
             function showMarker(map, pos) {
+            console.log('pos ', pos)
                 var marker = new google.maps.Marker({
                     position: pos,
                     map: map,
+                    // adding title
                     label: {
+                        // adding text with ip address
                         text: pos.ip
                     }
                 });
@@ -38,13 +41,15 @@
             function initMap() {
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 4,
-                    center: { lat: 37.7749, lng: -122.4194 } // San Francisco, fix the longitude to point west
+                    center: { lat: 37.7749, lng: -122.4194 } // San Francisco,
                 });
 
                 API.start("localhost:8888/wsapi/", function() {
-                    console.log("Ready to map stuff!");
+                    console.log("Ready to map stuff");
+                    // Sending message to point to San Francisco, fix the longitude to point west
                     API.sendMessage(JSON.stringify({ latitude: 37.3349, longitude: -122.4194, ip: 'localhost:8888' }))
                 }, function(position) {
+                console.log('position is ', position)
                     showMarker(map, posFromApi(position));
                 });
             }
@@ -62,7 +67,9 @@
             }
 
             function findAll() {
-                // TODO: implement searching of comma-separated values
+                // getting positions and comma separating them into a list
+                var positions = $('#input-one').val().split(',');
+                API.getAllHostPositions(positions);
             }
         </script>
     </head>
